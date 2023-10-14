@@ -4,12 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "*"
-python-dateutil = "*"
-colorama = "*"
-flask-cors = "*"
+flask = "==3.0.0"
+flask-cors = "==4.0.0"
+python-dateutil = "==2.8.2"
 
 [dev-packages]
 
 [requires]
-python_version = "3.8"
+python_version = "3.11"

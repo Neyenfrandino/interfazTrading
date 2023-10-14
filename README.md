@@ -48,9 +48,6 @@ curl -X GET -u neyen:jet_blanca http://localhost:5000/get
 Ejemplo de petición al método http `POST`:
 ```sh
 curl -X POST -H "Content-Type: application/json" -d "{\"objetivo\": \"Mi objetivo\", \"plan_trading\": \"Mi plan\", \"comienzo_nuevo_plan\": \"2023-10-15\", \"entrada\": 100.5, \"salida_perdida\": 90.0, \"salida_ganacia\": 110.0, \"riesgo_beneficio\": 1.1, \"cantidad_lotaje\": 1.0, \"cantidad_inicial_usdt\": 1000.0, \"resultado\": \"Ganancia\", \"nota_personal\": \"Comentario personal\"}" -u neyen:jet_blanca http://localhost:5000/insert
-
-
-
 ```
 
 
@@ -59,7 +56,6 @@ curl -X POST -H "Content-Type: application/json" -d "{\"objetivo\": \"Mi objetiv
 Ejemplo de petición al método http `PUT`:
 ```sh
 curl -X PUT -H "Content-Type: application/json" -d "{\"id_entrada\":1,\"objetivo\":\"Nuevo objetivo, wipiti\",\"plan_trading\":\"Nuevo plan\",\"comienzo_nuevo_plan\":\"2023-10-15\",\"entrada\":123.45,\"salida_perdida\":100.0,\"salida_ganacia\":150.0,\"riesgo_beneficio\":1.5,\"cantidad_lotaje\":2.0,\"cantidad_inicial_usdt\":2000.0,\"resultado\":\"Nuevo resultado, wipiti\",\"nota_personal\":\"Nueva nota personal\"}" -u neyen:jet_blanca http://localhost:5000/update
-
 ```
 
 
