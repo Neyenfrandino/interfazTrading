@@ -6,9 +6,12 @@ Con mucho cariño para você!!
 
 ## Instalación y ejecución del API
 
-Instalar las dependencias para el uso de `Flask` y manipulación de fechas
+Instalar las dependencias para el uso de `Flask` y manipulación de fechas.
+
+**Nota**: asegurarse de entrar a la carpeta del back end.
+
 ```sh
-pipenv install
+pipenv install -r requirements
 ```
 
 Ejecutar el script de python para habilitar API

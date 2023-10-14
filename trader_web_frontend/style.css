@@ -1,0 +1,153 @@
+body{
+    background-image: url(img/img3.jpeg);
+    background-size: 100%;
+    color: wheat;
+    font-family: monospace;
+    
+}
+
+.tituloInverciones{
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5); 
+    color: #fff; 
+    background-color: #333; 
+    border-radius: 100px;
+    padding: 10px; 
+}
+.contenedor {
+    border: solid wheat;
+    margin: 1%;
+    padding: 1%;
+    border-radius: 100px;
+    width: 50%; 
+    box-sizing: border-box;  
+    float: left; 
+}
+
+.contenedor1 {
+    border: solid wheat;
+    margin: 1% 1% 9%;
+    padding: 1%;
+    border-radius: 100px;
+    width: 50%; 
+    box-sizing: border-box; 
+    float: right; 
+}
+
+.objetivosLabel, .planTradingLabel {
+    background-color: #333; 
+    color: #fff; 
+    padding: 5px 10px; 
+    border-radius: 4px;
+    max-width: 50%; 
+    margin: 0 auto; 
+    text-align: center;
+}
+
+.notaPersonal{
+    background-color: #333; 
+    color: #fff; 
+    padding: 5px 10px; 
+    border-radius: 4px;
+    max-width: 50%; 
+    margin: 0 auto; 
+    text-align: center;
+}
+
+.btnNotaPersonal{
+    background-color: #333; 
+    color: #fff; 
+    padding: 10px 20px; 
+    border: none; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    transition: background-color 0.2s, transform 0.2s;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+}
+
+.btnObjetivos, .btnPlanTrading {
+    background-color: #333; 
+    color: #fff; 
+    padding: 10px 20px; 
+    border: none; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    transition: background-color 0.2s, transform 0.2s;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btnObjetivos:hover, .btnPlanTrading:hover, .btnNotaPersonal:hover {
+    background-color: #444; 
+    transform: translateY(-2px); 
+}
+
+.tablaDeDatos {
+    width: 80%;
+    margin: 2% auto;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: #ecf0f1; /* Fondo gris claro */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #bdc3c7; /* Borde gris */
+    color: #2c3e50; /* Texto azul oscuro */
+    margin-top: 20px; /* Mover la tabla hacia abajo */
+  }
+  
+  /* Estilos para celdas de tabla */
+  table, th, td {
+    border: 1px solid #bdc3c7; /* Borde gris */
+    padding: 10px;
+    text-align: center;
+  }
+  
+  /* Estilos para encabezados */
+  th {
+    background-color: #3498db; /* Fondo azul */
+    color: #fff; /* Texto blanco */
+  }
+  
+  /* Estilos para filas pares */
+  tr:nth-child(even) {
+    background-color: #f2f2f2; /* Fondo gris claro */
+  }
+  
+  /* Estilos para encabezados al pasar el cursor */
+  th:hover {
+    background-color: #2980b9; /* Fondo azul más oscuro al pasar el cursor */
+}
+
+.btnGuardar, .btnAgregarFila {
+    background-color: #007bff; 
+    color: white; 
+    border: none; 
+    padding: 5px 10px; 
+    border-radius: 5px;
+    cursor: pointer; 
+    font-size: 14px; 
+    display: flex;
+    right: 100px;
+}
+
+.btnGuardar::after {
+    content: "\2713"; 
+    margin-left: 0px; 
+}
+
+.btnGuardar:hover,.btnAgregarFila:hover {
+    background-color: #0056b3;
+}
+
+.contenedorDivTabla input{
+    width: 100%;
+    border: none;
+    background-color: #ecf0f1 ;
+}
+
