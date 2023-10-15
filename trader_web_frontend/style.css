@@ -151,3 +151,9 @@ body{
     background-color: #ecf0f1 ;
 }
 
+.celda-modificar::before {
+    content: "\270E"; 
+    color: blue; 
+    font-size: 24px;   
+}   
+  

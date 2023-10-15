@@ -1,23 +1,5 @@
-var listaDatos = []
+let listaDatos = []
 
-// listaElementos = [
-//   {
-//     "id_entrada": 1,
-//     "fecha_creacion": "2023-10-13 09:41:40",
-//     "fecha_actualizacion": "2023-10-13 09:41:40",
-//     "objetivo": "Mi objetivo",
-//     "plan_trading": "Mi plan",
-//     "comienzo_nuevo_plan": "2023-10-15",
-//     "entrada": 100.5,
-//     "salida_perdida": 90.0,
-//     "salida_ganacia": 110.0,
-//     "riesgo_beneficio": 1.1,
-//     "cantidad_lotaje": 1.0,
-//     "cantidad_inicial_usdt": 1000.0,
-//     "resultado": "Ganancia",
-//     "nota_personal": "Comentario personal"
-//   }
-// ]
 async function obtenerInformacion() {
   let auth = {
     username: "neyen",
@@ -42,14 +24,17 @@ async function obtenerInformacion() {
     for (let datos of listaDatos) {
       if (datos) {
         console.log(datos);
+        agregarInformacionTabla(datos);
       }else{
         console.log(datos.fecha_actualizacion)
+
       }
     }
   } catch (error) {
     console.error('Ocurrió un error al obtener la información:', error);
   }
 }
+
 
 
 // async function ActualizaciónDeDatos(id, salida_perdida, entrada) {
@@ -183,26 +168,24 @@ function tablaDinamica() {
   contenedorDivTabla.appendChild(elementoTabla);
 }
 
+function agregarInformacionTabla(información) {
+  let elementoTabla = document.getElementById('tablaDeDatos');
+  let fila = document.createElement('tr');
+  let celdas = {
+    celdaPuntoEntrada: "entrada",
+    celdaSalidaPerdida: "salida_perdida",
+    celdaSalidaGanacia: "salida_ganacia",
+    celdaRiesgoBeneficio: "riesgo_beneficio",
+    celdaLotage: "cantidad_lotaje",
+    celdaFecha: "fecha_actualizacion",
+    celdaResultado: "resultado",
+    celdaNumeroEntrada: "id_entrada",
+    celdaBtn: ""
+  };
 
-  function agregarInformacionTabla() {
-    let elementoTabla = document.getElementById('tablaDeDatos'); // Obtén la tabla existente
-    let fila = document.createElement('tr');
-    let celdas = {
-      celdaPuntoEntrada : "",
-      celdaSalidaPerdida : "",
-      celdaSalidaGanacia : "",
-      celdaRiesgoBeneficio : "",
-      celdaLotage : "",
-      celdaFecha : "",
-      celdaResultado : "",
-      celdaNumeroEntrada : "",
-      celdaBtn : ""
-      // Agrega más propiedades si es necesario
-    };
-  
+  if (información) {
     for (let celda in celdas) {
       let crearCelda = document.createElement('td');
-      
       if (celda === 'celdaBtn') {
         let botonGuardar = document.createElement('button');
         botonGuardar.id = 'btnGuardar';
@@ -214,46 +197,53 @@ function tablaDinamica() {
           // Obtén todos los inputs en la fila actual
           let inputs = fila.getElementsByTagName('input');
           
-          // Recorre los inputs y imprime sus valores
+          // Recorre los inputs y reemplaza con span
           for (let i = 0; i < inputs.length; i++) {
-            console.log(inputs[i].value);
-
             let nuevoElemento = document.createElement("span");
             nuevoElemento.textContent = inputs[i].value;
-
             inputs[i].parentNode.replaceChild(nuevoElemento, inputs[i]);
           }
         });
       } else {
-        let input = document.createElement('input');
-        input.type = 'text';
-        input.value = celdas[celda];
-        crearCelda.appendChild(input);
+        let valorCelda = información[celdas[celda]];
+        if (valorCelda !== null && valorCelda !== undefined) {
+          // Si el valor no es nulo o indefinido, muestra el valor en lugar de un input
+          let nuevoElemento = document.createElement("span");
+          nuevoElemento.textContent = valorCelda;
+          crearCelda.appendChild(nuevoElemento);
+
+        } else {
+          // Si el valor es nulo o indefinido, crea un input vacío
+          let input = document.createElement('input');
+          input.type = 'text';
+          crearCelda.appendChild(input);
+        }
       }
-    
       fila.appendChild(crearCelda);
     }
-    
-    // Agregar la fila a la tabla
-    elementoTabla.appendChild(fila);
+  } else {
+    // Cuando no hay información, crea celdas vacías
+    for (let celda in celdas) {
+      let crearCelda = document.createElement('td');
+      if (celda === 'celdaBtn') {
+        let botonGuardar = document.createElement('button');
+        botonGuardar.id = 'btnGuardar';
+        botonGuardar.textContent = '';
+        botonGuardar.className = 'btnGuardar';
+        crearCelda.appendChild(botonGuardar);
+      } else {
+        let input = document.createElement('input');
+        input.type = 'text';
+        crearCelda.appendChild(input);
+      }
+      fila.appendChild(crearCelda);
+    }
   }
   
-tablaDinamica()
-obtenerInformacion();
+  // Agregar la fila a la tabla
+  elementoTabla.appendChild(fila);
+}
 
-// AgregarNuevoElementoTabla(
-//   1,
-//   '2023-10-13 09:41:40', // Fecha de creación
-//   '2023-10-13 09:41:40', // Fecha de actualización
-//   'Soy rentable',
-//   'ganar más de lo que gasto',
-//   '2023-10-10', // Comienzo de nuevo plan
-//   100,
-//   50, // Salida pérdida
-//   150, // Salida ganancia
-//   1.3, // Riesgo beneficio
-//   0.05, // Cantidad lotaje
-//   150, // Cantidad inicial USDT
-//   'ganada', // Resultado
-//   'eres un ganador' // Nota personal
-// );
+
+tablaDinamica()
+obtenerInformacion()
