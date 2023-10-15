@@ -4,140 +4,168 @@
 '''
 
 from flask import Flask, request, jsonify
-from flask_cors import CORS
-import json
+from flask_cors import CORS 
+from flask_sqlalchemy import SQLAlchemy
+from flask_basicauth import BasicAuth
 from datetime import datetime
-from functools import wraps
+from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
 CORS(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///trading_entries.db'
+db = SQLAlchemy(app)
 
-# Datos de autenticación
-username = "neyen"
-password = "jet_blanca"
+# Configure basic authentication
+app.config['BASIC_AUTH_USERNAME'] = 'neyen'
+app.config['BASIC_AUTH_PASSWORD'] = 'jet_blanca'
+basic_auth = BasicAuth(app)
 
-# Decorador de autenticación
-def require_auth(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        auth = request.authorization
-        if not auth or auth.username != username or auth.password != password:
-            return jsonify({"codigo": 401, "mensaje": "Autenticación fallida"}), 401
-        return func(*args, **kwargs)
-    return wrapper
+# Modelo de datos para las entradas de trading
+class TradingEntry(db.Model):
+    id_entrada = db.Column(db.Integer, primary_key=True)
+    fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+    fecha_actualizacion = db.Column(db.DateTime, default=datetime.utcnow)
+    trading_objetivo = db.Column(db.String)
+    plan_trading_detalle = db.Column(db.String)
+    plan_trading_inicio = db.Column(db.Date)
+    entrada_es_compra = db.Column(db.Boolean, nullable=False)
+    punto_entrada = db.Column(db.Float, nullable=False)
+    stop_loss = db.Column(db.Float, nullable=False)
+    take_profit = db.Column(db.Float)
+    riesgo_beneficio = db.Column(db.Float, nullable=False)
+    cantidad_lotaje = db.Column(db.Float, nullable=False)
+    cantidad_inicial_usdt = db.Column(db.Float, nullable=False)
+    entrada_ganada = db.Column(db.Boolean)
+    nota_personal = db.Column(db.String)
 
-# Archivo de datos
-data_file = "entradas.json"
-
-# Cargar datos desde el archivo JSON
-def cargar_datos():
-    try:
-        with open(data_file, 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return []
-
-# Guardar datos en el archivo JSON
-def guardar_datos(entries):
-    with open(data_file, 'w') as f:
-        json.dump(entries, f, indent=2)
-
-# Validar que los datos siguen el contrato de datos
-def validar_datos(data):
-    campos_obligatorios = ["objetivo", "plan_trading", "comienzo_nuevo_plan", "entrada", "salida_perdida", "salida_ganacia", "riesgo_beneficio", "cantidad_lotaje", "cantidad_inicial_usdt", "resultado", "nota_personal"]
-    for campo in campos_obligatorios:
-        if campo not in data:
+# Validación para asegurarse de que los campos requeridos no estén vacíos
+def validate_entry_data(data):
+    required_fields = ['entrada_es_compra', 'punto_entrada', 'stop_loss', 'riesgo_beneficio', 'cantidad_lotaje', 'cantidad_inicial_usdt']
+    for field in required_fields:
+        if field not in data or data[field] is None:
             return False
-    try:
-        datetime.strptime(data["comienzo_nuevo_plan"], "%Y-%m-%d")
-        float(data["entrada"])
-        float(data["salida_perdida"])
-        float(data["salida_ganacia"])
-        float(data["riesgo_beneficio"])
-        float(data["cantidad_lotaje"])
-        float(data["cantidad_inicial_usdt"])
-    except (KeyError, ValueError):
-        return False
     return True
 
-# Crear una entrada
-@app.route('/insert', methods=['POST'])
-@require_auth
-def insert_entry():
-    data = request.get_json()
-    if not validar_datos(data):
-        return jsonify({"codigo": 400, "mensaje": "Datos no válidos"}), 400
-    
-    data["fecha_creacion"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    data["fecha_actualizacion"] = data["fecha_creacion"]
-    
-    entries = cargar_datos()
-    if len(entries) > 0:
-        data["id_entrada"] = max(entry["id_entrada"] for entry in entries) + 1
-    else:
-        data["id_entrada"] = 1  # Asignar un ID único si es la primera entrada
-    
-    # Reorganizar el objeto para que los campos de auditoría estén al principio
-    reordered_data = {
-        "id_entrada": data["id_entrada"],
-        "fecha_creacion": data["fecha_creacion"],
-        "fecha_actualizacion": data["fecha_actualizacion"],
-        "objetivo": data["objetivo"],
-        "plan_trading": data["plan_trading"],
-        "comienzo_nuevo_plan": data["comienzo_nuevo_plan"],
-        "entrada": data["entrada"],
-        "salida_perdida": data["salida_perdida"],
-        "salida_ganacia": data["salida_ganacia"],
-        "riesgo_beneficio": data["riesgo_beneficio"],
-        "cantidad_lotaje": data["cantidad_lotaje"],
-        "cantidad_inicial_usdt": data["cantidad_inicial_usdt"],
-        "resultado": data["resultado"],
-        "nota_personal": data["nota_personal"]
-    }
-    
-    entries.insert(0, reordered_data)  # Agregar la nueva entrada al principio de la lista
-    guardar_datos(entries)
-    
-    return jsonify({"codigo": 201, "mensaje": "Entrada creada"}), 201
-
-# Leer todas las entradas
+# Ruta para obtener todas las entradas de trading
 @app.route('/get', methods=['GET'])
-@require_auth
-def get_entries():
-    entries = cargar_datos()
-    return jsonify(entries)
+@basic_auth.required
+def get_all_entries():
+    entries = TradingEntry.query.all()
+    entry_list = []
+    for entry in entries:
+        entry_list.append({
+            'id_entrada': entry.id_entrada,
+            'fecha_creacion': entry.fecha_creacion,
+            'fecha_actualizacion': entry.fecha_actualizacion,
+            'trading_objetivo': entry.trading_objetivo,
+            'plan_trading_detalle': entry.plan_trading_detalle,
+            'plan_trading_inicio': entry.plan_trading_inicio,
+            'entrada_es_compra': entry.entrada_es_compra,
+            'punto_entrada': entry.punto_entrada,
+            'stop_loss': entry.stop_loss,
+            'take_profit': entry.take_profit,
+            'riesgo_beneficio': entry.riesgo_beneficio,
+            'cantidad_lotaje': entry.cantidad_lotaje,
+            'cantidad_inicial_usdt': entry.cantidad_inicial_usdt,
+            'entrada_ganada': entry.entrada_ganada,
+            'nota_personal': entry.nota_personal
+        })
+    return jsonify(entry_list)
 
-# Actualizar una entrada
-@app.route('/update', methods=['PUT'])
-@require_auth
-def update_entry():
-    data = request.get_json()
-    if not validar_datos(data):
-        return jsonify({"codigo": 400, "mensaje": "Datos no válidos"}), 400
+# Ruta para obtener una entrada de trading por ID
+@app.route('/get/<int:id>', methods=['GET'])
+@basic_auth.required
+def get_entry_by_id(id):
+    entry = TradingEntry.query.get(id)
+    if entry is not None:
+        return jsonify({
+            'id_entrada': entry.id_entrada,
+            'fecha_creacion': entry.fecha_creacion,
+            'fecha_actualizacion': entry.fecha_actualizacion,
+            'trading_objetivo': entry.trading_objetivo,
+            'plan_trading_detalle': entry.plan_trading_detalle,
+            'plan_trading_inicio': entry.plan_trading_inicio,
+            'entrada_es_compra': entry.entrada_es_compra,
+            'punto_entrada': entry.punto_entrada,
+            'stop_loss': entry.stop_loss,
+            'take_profit': entry.take_profit,
+            'riesgo_beneficio': entry.riesgo_beneficio,
+            'cantidad_lotaje': entry.cantidad_lotaje,
+            'cantidad_inicial_usdt': entry.cantidad_inicial_usdt,
+            'entrada_ganada': entry.entrada_ganada,
+            'nota_personal': entry.nota_personal
+        })
+    return jsonify({'message': 'Entrada no encontrada'}, 404)
+
+# Ruta para insertar una nueva entrada de trading
+@app.route('/insert', methods=['POST'])
+@basic_auth.required
+def insert_entry():
+    data = request.json
+
+    # Parse the date string into a Python date object
+    if 'plan_trading_inicio' in data and data['plan_trading_inicio']:
+        data['plan_trading_inicio'] = datetime.strptime(data['plan_trading_inicio'], '%Y-%m-%d').date()
+
+    try:
+        if validate_entry_data(data):
+            new_entry = TradingEntry(**data)
+            db.session.add(new_entry)
+            db.session.commit()
+            return jsonify({'code': 201, 'message': 'Entrada insertada con éxito'})
+    except IntegrityError as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error al insertar la entrada debido a restricciones de la base de datos.'}, 400)
+
+    return jsonify({'message': 'Los campos requeridos no pueden estar vacíos'}, 400)
+
+
+# Ruta para actualizar una entrada de trading por ID
+@app.route('/update/<int:id>', methods=['PUT'])
+@basic_auth.required
+def update_entry(id):
+    data = request.json
+    entry = TradingEntry.query.get(id)
     
-    entry_id = data.get("id_entrada")
-    if entry_id is not None:
-        entries = cargar_datos()
-        for entry in entries:
-            if entry["id_entrada"] == entry_id:
-                entry.update(data)
-                entry["fecha_actualizacion"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                guardar_datos(entries)
-                return jsonify({"codigo": 200, "mensaje": "Entrada actualizada"}), 200
+    if entry is not None:
+        try:
+            for field in TradingEntry.__table__.columns.keys():
+                if field in data:
+                    setattr(entry, field, data[field])
 
-    return jsonify({"codigo": 404, "mensaje": "Entrada no encontrada"}), 404
+            entry.fecha_actualizacion = datetime.utcnow()
+            db.session.commit()
+            return jsonify({'code': 200, 'message': 'Entrada actualizada con éxito'})
+        except IntegrityError as e:
+            db.session.rollback()
+            return jsonify({'message': 'Error al actualizar la entrada debido a restricciones de la base de datos.'}, 400)
+    
+    return jsonify({'message': 'Entrada no encontrada'}, 404)
 
-# Eliminar una entrada
-@app.route('/delete', methods=['DELETE'])
-@require_auth
-def delete_entry():
-    data = request.get_json()
-    entry_id = data.get("id_entrada")
-    if entry_id is not None:
-        entries = cargar_datos()
-        entries = [entry for entry in entries if entry["id_entrada"] != entry_id]
-        guardar_datos(entries)
-        return jsonify({"codigo": 200, "mensaje": "Entrada eliminada"}), 200
+
+
+# Ruta para eliminar una entrada de trading por ID
+@app.route('/delete/<int:id>', methods=['DELETE'])
+@basic_auth.required
+def delete_entry(id):
+    entry = TradingEntry.query.get(id)
+    
+    if entry is not None:
+        try:
+            db.session.delete(entry)
+            db.session.commit()
+            return jsonify({'code': 200, 'message': 'Entrada eliminada con éxito'})
+        except IntegrityError as e:
+            db.session.rollback()
+            return jsonify({'message': 'Error al eliminar la entrada debido a restricciones de la base de datos.'}, 400)
+
+    return jsonify({'message': 'Entrada no encontrada'}, 404)
+
+
+def create_tables():
+    with app.app_context():
+        db.create_all()
 
 if __name__ == '__main__':
+    create_tables()
     app.run(debug=True)
