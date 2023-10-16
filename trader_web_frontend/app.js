@@ -1,10 +1,9 @@
-let listaDatos = []
+let auth = {
+  username: "neyen",
+  password: "jet_blanca"
+};
 
 async function obtenerInformacion() {
-  let auth = {
-    username: "neyen",
-    password: "jet_blanca"
-  };
 
   try {
     let response = await fetch('http://localhost:5000/get', {
@@ -18,232 +17,251 @@ async function obtenerInformacion() {
       throw new Error('No se pudo completar la solicitud');
     }
 
-    listaDatos = await response.json();
-    
-    // Realiza operaciones con la lista de datos aquí
-    for (let datos of listaDatos) {
-      if (datos) {
-        console.log(datos);
-        agregarInformacionTabla(datos);
-      }else{
-        console.log(datos.fecha_actualizacion)
-
-      }
-    }
+    let listaDatos = await response.json();
+    tablaDinamica(listaDatos); // Llamar a tablaDinamica con todos los datos
   } catch (error) {
     console.error('Ocurrió un error al obtener la información:', error);
   }
 }
 
-
-
-// async function ActualizaciónDeDatos(id, salida_perdida, entrada) {
-//   let auth = {
-//     username: "neyen",
-//     password: "jet_blanca"
-//   };
-
-//   try {
-//     let updateData = {
-//       id: id,
-//       salida_perdida: salida_perdida,
-//       entrada: entrada
-//     };
-
-//     await fetch('http://localhost:5000/update/id_entrada/'+ id, { // Aquí incluyes el ID en la URL
-//       method: 'PUT',
-//       headers: {
-//         'Authorization': `Basic ${btoa(`${auth.username}:${auth.password}`)}`,
-//         'Content-Type': 'application/json'
-//       },
-//       body: JSON.stringify(updateData)
-//     });
-
-//   } catch (error) {
-//     console.error(error);
-//   }
-// }
-
-// ActualizaciónDeDatos(8, 1500000.0, 888888); // Actualiza el campo "salida_perdida" a 95.0 en el registro con ID 1
-
-async function AgregarNuevoElementoTabla(
-  id_entrada,
-  fecha_creacion,
-  fecha_actualizacion,
-  objetivo,
-  plan_trading,
-  comienzo_nuevo_plan,
-  puntoEntrada,
-  salida_perdida,
-  salida_ganacia,
-  riesgo_beneficio,
-  cantidad_lotaje,
+async function insertarDatos(
   cantidad_inicial_usdt,
-  resultado,
-  nota_personal
+  cantidad_lotaje,
+  entrada_es_compra,
+  entrada_ganada,
+  fecha_actualizacion,
+  fecha_creacion,
+  id_entrada,
+  nota_personal,
+  plan_trading_detalle,
+  plan_trading_inicio,
+  punto_entrada,
+  riesgo_beneficio,
+  stop_loss,
+  take_profit,
+  trading_objetivo
 ) {
-  let auth = {
-    username: "neyen",
-    password: "jet_blanca"
-  };
+
+  objEntrada = {
+    cantidad_inicial_usdt: cantidad_inicial_usdt,
+    cantidad_lotaje: cantidad_lotaje,
+    entrada_es_compra: entrada_es_compra,
+    entrada_ganada: entrada_ganada,
+    nota_personal: nota_personal,
+    plan_trading_detalle: plan_trading_detalle,
+    plan_trading_inicio: plan_trading_inicio,
+    punto_entrada: punto_entrada,
+    riesgo_beneficio: riesgo_beneficio,
+    stop_loss: stop_loss,
+    take_profit: take_profit,
+    trading_objetivo: trading_objetivo,
+  }
 
   try {
-    let nuevoElemento = {
-      id_entrada: id_entrada,
-      fecha_creacion: fecha_creacion,
-      fecha_actualizacion: fecha_actualizacion,
-      objetivo: objetivo,
-      plan_trading: plan_trading,
-      comienzo_nuevo_plan: comienzo_nuevo_plan,
-      entrada: puntoEntrada,
-      salida_perdida: salida_perdida,
-      salida_ganacia: salida_ganacia,
-      riesgo_beneficio: riesgo_beneficio,
-      cantidad_lotaje: cantidad_lotaje,
-      cantidad_inicial_usdt: cantidad_inicial_usdt,
-      resultado: resultado,
-      nota_personal: nota_personal
-    };
-
     let respuesta = await fetch('http://localhost:5000/insert', {
-      method: "POST",
+      method: 'POST',
       headers: {
-        'Authorization': `Basic ${btoa(`${auth.username}:${auth.password}`)}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${btoa(`${auth.username}:${auth.password}`)}`
       },
-      body: JSON.stringify(nuevoElemento)
+      body: JSON.stringify(objEntrada)
     });
 
-    if (respuesta.ok) {
-      let resultado = await respuesta.json();
-      console.log("Elemento agregado:", resultado);
-    } else {
-      console.error("Error al agregar elemento:", respuesta.status, respuesta.statusText);
+    if (!respuesta.ok) {
+      throw new Error('Error en la solicitud ' + respuesta.statusText);
     }
+
+    let data = await respuesta.json();
+    console.log('Registro creado: ', data);
   } catch (error) {
-    console.error('Ocurrió un error al agregar el nuevo elemento:', error);
+    console.error('Algo salió mal al crear el registro: ', error);
   }
 }
 
-function tablaDinamica() {
+function lili() {
+  insertarDatos(
+    10,
+    1000,
+    true,
+    true,
+    '',
+    '',
+    '',
+    'nota de prueba',
+    'detalle de prueba',
+    '2023-10-15',
+    1.234,
+    2.0,
+    1.200,
+    1.300,
+    'Objetivo de trading'
+  );
+}
+
+
+
+function tablaDinamica(listaDatos) {
+  let contenedorDivTabla = document.getElementById('contenedorDivTabla');
   let elementoTabla = document.createElement('table');
   elementoTabla.className = 'tablaDeDatos';
   elementoTabla.id = 'tablaDeDatos';
 
+  // Crear el encabezado de la tabla
   let crearEncabezadoElemento = document.createElement('tr');
   let encabezado = {
-    encabezadoPuntoEntrada: 'Entrada(PE)',
-    encabezadoSalidaPerdida: 'SalidaPerdida(SL)',
-    encabezadoSalidaGanancia: 'SalidaGanancia(TP)',
-    encabezadoRiesgoBeneficio: 'RiesgoBeneficio(RB)',
-    encabezadoLotage: 'Cantidad(Lotage)',
-    encabezadoFecha: 'Fecha Actual',
-    encabezadoResultado: 'Resultado',
-    encabezadoNumeroEntrada: 'Numero Entrada(id)',
-    encabezadoBtnAgregarFila: 'valor'
+      encabezadoPuntoEntrada: 'Entrada(PE)',
+      encabezadoSalidaPerdida: 'SalidaPerdida(SL)',
+      encabezadoSalidaGanancia: 'SalidaGanancia(TP)',
+      encabezadoRiesgoBeneficio: 'RiesgoBeneficio(RB)',
+      encabezadoLotage: 'Cantidad(Lotage)',
+      encabezadoFecha: 'Fecha Actual',
+      entrada_es_compra: 'Compra o venta',
+      encabezadoResultado: 'Resultado',
+      encabezadoNumeroEntrada: 'Numero Entrada(id)',
+      encabezadoBtnAgregarFila: ''
   };
 
   for (let titulo in encabezado) {
-    let celda = document.createElement('th');
-    
-    if (titulo == 'encabezadoBtnAgregarFila') {
-      let botonGuardar = document.createElement('button');
-      botonGuardar.id = 'btnAgregar';
-      botonGuardar.textContent = '+';
-      botonGuardar.className = 'btnGuardar';
-      botonGuardar.addEventListener('click', function () {
-        agregarInformacionTabla();
-      });
-      celda.appendChild(botonGuardar);
-    } else {
-      celda.textContent = encabezado[titulo];
-    }
+      let encabezadoCelda = document.createElement('th');
 
-    crearEncabezadoElemento.appendChild(celda);
+      if (titulo === "encabezadoBtnAgregarFila") { 
+          let botonCrearFila = document.createElement('button');
+          botonCrearFila.id = 'btnAgregarFila';
+          botonCrearFila.className = 'btnAgregarFila';
+          botonCrearFila.textContent = '+'; 
+          encabezadoCelda.appendChild(botonCrearFila);
+
+          botonCrearFila.addEventListener('click', function(){
+            console.log('funciona')
+            crearFilaIngresarInformacion(elementoTabla)
+          })
+      } else {
+          encabezadoCelda.textContent = encabezado[titulo];
+      }
+      crearEncabezadoElemento.appendChild(encabezadoCelda);
   }
-
   elementoTabla.appendChild(crearEncabezadoElemento);
 
-  let contenedorDivTabla = document.getElementById('contenedorDivTabla');
+  for (let datos of listaDatos) {
+
+      AgregarInformacionATablaDeBaseDeDatos(elementoTabla, datos);
+  }
+
   contenedorDivTabla.appendChild(elementoTabla);
 }
 
-function agregarInformacionTabla(información) {
-  let elementoTabla = document.getElementById('tablaDeDatos');
-  let fila = document.createElement('tr');
-  let celdas = {
-    celdaPuntoEntrada: "entrada",
-    celdaSalidaPerdida: "salida_perdida",
-    celdaSalidaGanacia: "salida_ganacia",
-    celdaRiesgoBeneficio: "riesgo_beneficio",
-    celdaLotage: "cantidad_lotaje",
-    celdaFecha: "fecha_actualizacion",
-    celdaResultado: "resultado",
-    celdaNumeroEntrada: "id_entrada",
-    celdaBtn: ""
+function AgregarInformacionATablaDeBaseDeDatos(elementoTabla, datos) {
+  let fila = elementoTabla.insertRow();
+  let camposExcluidos = {
+      celdaPuntoEntrada: "punto_entrada",
+      celdaSalidaPerdida: "stop_loss",
+      celdaSalidaGanacia: "take_profit",
+      celdaRiesgoBeneficio: "riesgo_beneficio",
+      celdaLotage: "cantidad_lotaje",
+      celdaFecha: "fecha_creacion",
+      celdaEntrada_es_compra: 'Compra o venta',
+      celdaResultado: "entrada_ganada",
+      celdaNumeroEntrada: "id_entrada",
+      celdaBtn: ""
   };
-
-  if (información) {
-    for (let celda in celdas) {
-      let crearCelda = document.createElement('td');
-      if (celda === 'celdaBtn') {
-        let botonGuardar = document.createElement('button');
-        botonGuardar.id = 'btnGuardar';
-        botonGuardar.textContent = '';
-        botonGuardar.className = 'btnGuardar';
-        crearCelda.appendChild(botonGuardar);
-        
-        botonGuardar.addEventListener('click', function () {
-          // Obtén todos los inputs en la fila actual
-          let inputs = fila.getElementsByTagName('input');
-          
-          // Recorre los inputs y reemplaza con span
-          for (let i = 0; i < inputs.length; i++) {
-            let nuevoElemento = document.createElement("span");
-            nuevoElemento.textContent = inputs[i].value;
-            inputs[i].parentNode.replaceChild(nuevoElemento, inputs[i]);
-          }
-        });
-      } else {
-        let valorCelda = información[celdas[celda]];
-        if (valorCelda !== null && valorCelda !== undefined) {
-          // Si el valor no es nulo o indefinido, muestra el valor en lugar de un input
-          let nuevoElemento = document.createElement("span");
-          nuevoElemento.textContent = valorCelda;
-          crearCelda.appendChild(nuevoElemento);
-
-        } else {
-          // Si el valor es nulo o indefinido, crea un input vacío
-          let input = document.createElement('input');
-          input.type = 'text';
-          crearCelda.appendChild(input);
-        }
-      }
-      fila.appendChild(crearCelda);
-    }
-  } else {
-    // Cuando no hay información, crea celdas vacías
-    for (let celda in celdas) {
-      let crearCelda = document.createElement('td');
-      if (celda === 'celdaBtn') {
-        let botonGuardar = document.createElement('button');
-        botonGuardar.id = 'btnGuardar';
-        botonGuardar.textContent = '';
-        botonGuardar.className = 'btnGuardar';
-        crearCelda.appendChild(botonGuardar);
-      } else {
-        let input = document.createElement('input');
-        input.type = 'text';
-        crearCelda.appendChild(input);
-      }
-      fila.appendChild(crearCelda);
+  
+  for (let titulo in camposExcluidos) {
+      let celda = fila.insertCell();
+      celda.textContent = datos[camposExcluidos[titulo]];
+    if(titulo === 'celdaBtn'){
+      botonGuardar(celda)
     }
   }
-  
-  // Agregar la fila a la tabla
-  elementoTabla.appendChild(fila);
+}
+
+function crearFilaIngresarInformacion(elementoTabla){
+  let fila = elementoTabla.insertRow();
+  fila.id = 'filaID'
+  let camposExcluidos = {
+    celdaPuntoEntrada: "",
+    celdaSalidaPerdida: "",
+    celdaSalidaGanacia: "",
+    celdaRiesgoBeneficio: "",
+    celdaLotage: "",
+    celdaFecha: "",
+    celdaEntrada_es_compra: '',
+    celdaResultado: "",
+    celdaNumeroEntrada: "",
+    celdaBtn: ""
+}
+  for (let titulo in camposExcluidos) {
+    let celda = fila.insertCell();
+    celda.id = 'celdasID'
+    if(titulo == 'celdaNumeroEntrada'){
+      celda.textContent = ''
+    }else if (titulo == 'celdaFecha'){
+      celda.textContent = ''
+    }else if(titulo == 'celdaBtn'){
+      botonGuardar(celda)
+    } else{
+      input = document.createElement('input');
+      celda.appendChild(input)
+      input.id = 'entradaInput';
+    }
+  }
+}
+function botonGuardar(celda) {
+  btnGuardar = document.createElement('button');
+  btnGuardar.id = 'btnGuardar';
+  btnGuardar.className = 'btnGuardar';
+  celda.appendChild(btnGuardar);
+
+  btnGuardar.addEventListener('click', function () {
+    fila = document.getElementById('filaID');
+    let inputs = fila.querySelectorAll('input');
+    let valores = {};
+
+    inputs.forEach(function (input) {
+      let nombre = input.id; // Utilizar el ID del input como nombre de la propiedad
+      let valor = input.value; // Obtener el valor del input
+      valores[nombre] = valor; // Agregar el valor al objeto de valores
+    });
+
+    console.log(valores);
+
+    // Ahora puedes pasar el objeto "valores" a tu función "insertarDatos"
+    // Nota: Asegúrate de que los nombres de las propiedades coincidan con los parámetros de la función.
+    insertarDatos(
+      valores.celdaPuntoEntrada,
+      valores.celdaLotage,
+      valores.celdaEsCompra,
+      valores.celdaGanancia,
+      valores.celdaActualizacion,
+      valores.celdaCreacion,
+      valores.celdaEntrada,
+      valores.notaPersonal,
+      valores.detallePlan,
+      valores.fechaPlan,
+      valores.puntoEntrada,
+      valores.riesgoBeneficio,
+      valores.stopLoss,
+      valores.takeProfit,
+      valores.objetivoTrading
+    );
+  });
 }
 
 
-tablaDinamica()
 obtenerInformacion()
+
+
+//  cantidad_inicial_usdt
+//  cantidad_lotaje
+//  entrada_es_compra
+//  entrada_ganada
+//  fecha_actualizacion
+//  fecha_creacion
+//  id_entrada
+//  nota_personal
+//  plan_trading_detalle
+//  plan_trading_inicio
+//  punto_entrada
+//  riesgo_beneficio
+//  stop_loss
+//  take_profit
+//  trading_objetivo

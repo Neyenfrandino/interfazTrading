@@ -72,8 +72,7 @@ curl -u neyen:jet_blanca -X PUT -H "Content-Type: application/json" -d "{ \"plan
 
 Ejemplo de petición al método http `DELETE`:
 ```sh
-curl -u neyen:jet_blanca -X DELETE http://localhost:5000/delete/4
-```
+curl -u neyen:jet_blanca -X DELETE http://localhost:5000/delete/3
 
 
 ## Requerimiento para chatcito
