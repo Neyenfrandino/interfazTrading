@@ -103,11 +103,11 @@ def get_entry_by_id(id):
 def insert_entry():
     data = request.json
 
-    # Parse the date string into a Python date object
-    if 'plan_trading_inicio' in data and data['plan_trading_inicio']:
-        data['plan_trading_inicio'] = datetime.strptime(data['plan_trading_inicio'], '%Y-%m-%d').date()
-
     try:
+        # Parse the date string into a Python date object
+        if 'plan_trading_inicio' in data and data['plan_trading_inicio']:
+            data['plan_trading_inicio'] = datetime.strptime(data['plan_trading_inicio'], '%Y-%m-%d').date()
+        
         if validate_entry_data(data):
             new_entry = TradingEntry(**data)
             db.session.add(new_entry)
@@ -116,6 +116,8 @@ def insert_entry():
     except IntegrityError as e:
         db.session.rollback()
         return jsonify({'message': 'Error al insertar la entrada debido a restricciones de la base de datos.'}, 400)
+    except Exception as e:
+        return jsonify({'message': f'Error care piola: {e=}'}, 400)
 
     return jsonify({'message': 'Los campos requeridos no pueden estar vacíos'}, 400)
 
@@ -139,6 +141,8 @@ def update_entry(id):
         except IntegrityError as e:
             db.session.rollback()
             return jsonify({'message': 'Error al actualizar la entrada debido a restricciones de la base de datos.'}, 400)
+        except Exception as e:
+            return jsonify({'message': f'Error care piola: {e=}'}, 400)
     
     return jsonify({'message': 'Entrada no encontrada'}, 404)
 
