@@ -27,7 +27,6 @@ class TradingEntry(db.Model):
     fecha_actualizacion = db.Column(db.DateTime, default=datetime.utcnow)
     trading_objetivo = db.Column(db.String)
     plan_trading_detalle = db.Column(db.String)
-    plan_trading_inicio = db.Column(db.Date)
     entrada_es_compra = db.Column(db.Boolean, nullable=False)
     punto_entrada = db.Column(db.Float, nullable=False)
     stop_loss = db.Column(db.Float, nullable=False)
@@ -59,7 +58,6 @@ def get_all_entries():
             'fecha_actualizacion': entry.fecha_actualizacion,
             'trading_objetivo': entry.trading_objetivo,
             'plan_trading_detalle': entry.plan_trading_detalle,
-            'plan_trading_inicio': entry.plan_trading_inicio,
             'entrada_es_compra': entry.entrada_es_compra,
             'punto_entrada': entry.punto_entrada,
             'stop_loss': entry.stop_loss,
@@ -84,7 +82,6 @@ def get_entry_by_id(id):
             'fecha_actualizacion': entry.fecha_actualizacion,
             'trading_objetivo': entry.trading_objetivo,
             'plan_trading_detalle': entry.plan_trading_detalle,
-            'plan_trading_inicio': entry.plan_trading_inicio,
             'entrada_es_compra': entry.entrada_es_compra,
             'punto_entrada': entry.punto_entrada,
             'stop_loss': entry.stop_loss,
@@ -104,10 +101,6 @@ def insert_entry():
     data = request.json
 
     try:
-        # Parse the date string into a Python date object
-        if 'plan_trading_inicio' in data and data['plan_trading_inicio']:
-            data['plan_trading_inicio'] = datetime.strptime(data['plan_trading_inicio'], '%Y-%m-%d').date()
-        
         if validate_entry_data(data):
             new_entry = TradingEntry(**data)
             db.session.add(new_entry)
@@ -145,7 +138,6 @@ def update_entry(id):
             return jsonify({'message': f'Error care piola: {e=}'}, 400)
     
     return jsonify({'message': 'Entrada no encontrada'}, 404)
-
 
 
 # Ruta para eliminar una entrada de trading por ID
