@@ -1,11 +1,9 @@
-let listaDatos = []
-
+let auth = {
+  username: "neyen",
+  password: "jet_blanca"
+};
+ 
 async function obtenerInformacion() {
-  let auth = {
-    username: "neyen",
-    password: "jet_blanca"
-  };
-
   try {
     let response = await fetch('http://localhost:5000/get', {
       method: 'GET',
@@ -18,118 +16,46 @@ async function obtenerInformacion() {
       throw new Error('No se pudo completar la solicitud');
     }
 
-    listaDatos = await response.json();
-    
-    // Realiza operaciones con la lista de datos aquí
-    for (let datos of listaDatos) {
-      if (datos) {
-        console.log(datos);
-        agregarInformacionTabla(datos);
-      }else{
-        console.log(datos.fecha_actualizacion)
+    let listaDatos = await response.json();
+    let tablaDeDatos = tablaDinamica(listaDatos);
+    btnModificar(tablaDeDatos)
 
-      }
-    }
+    
   } catch (error) {
     console.error('Ocurrió un error al obtener la información:', error);
   }
 }
 
 
-
-// async function ActualizaciónDeDatos(id, salida_perdida, entrada) {
-//   let auth = {
-//     username: "neyen",
-//     password: "jet_blanca"
-//   };
-
-//   try {
-//     let updateData = {
-//       id: id,
-//       salida_perdida: salida_perdida,
-//       entrada: entrada
-//     };
-
-//     await fetch('http://localhost:5000/update/id_entrada/'+ id, { // Aquí incluyes el ID en la URL
-//       method: 'PUT',
-//       headers: {
-//         'Authorization': `Basic ${btoa(`${auth.username}:${auth.password}`)}`,
-//         'Content-Type': 'application/json'
-//       },
-//       body: JSON.stringify(updateData)
-//     });
-
-//   } catch (error) {
-//     console.error(error);
-//   }
-// }
-
-// ActualizaciónDeDatos(8, 1500000.0, 888888); // Actualiza el campo "salida_perdida" a 95.0 en el registro con ID 1
-
-async function AgregarNuevoElementoTabla(
-  id_entrada,
-  fecha_creacion,
-  fecha_actualizacion,
-  objetivo,
-  plan_trading,
-  comienzo_nuevo_plan,
-  puntoEntrada,
-  salida_perdida,
-  salida_ganacia,
-  riesgo_beneficio,
-  cantidad_lotaje,
-  cantidad_inicial_usdt,
-  resultado,
-  nota_personal
-) {
-  let auth = {
-    username: "neyen",
-    password: "jet_blanca"
-  };
-
+async function insertarDatos(datos) {
   try {
-    let nuevoElemento = {
-      id_entrada: id_entrada,
-      fecha_creacion: fecha_creacion,
-      fecha_actualizacion: fecha_actualizacion,
-      objetivo: objetivo,
-      plan_trading: plan_trading,
-      comienzo_nuevo_plan: comienzo_nuevo_plan,
-      entrada: puntoEntrada,
-      salida_perdida: salida_perdida,
-      salida_ganacia: salida_ganacia,
-      riesgo_beneficio: riesgo_beneficio,
-      cantidad_lotaje: cantidad_lotaje,
-      cantidad_inicial_usdt: cantidad_inicial_usdt,
-      resultado: resultado,
-      nota_personal: nota_personal
-    };
-
     let respuesta = await fetch('http://localhost:5000/insert', {
-      method: "POST",
+      method: 'POST',
       headers: {
-        'Authorization': `Basic ${btoa(`${auth.username}:${auth.password}`)}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${btoa(`${auth.username}:${auth.password}`)}`
       },
-      body: JSON.stringify(nuevoElemento)
+      body: JSON.stringify(datos)
     });
 
-    if (respuesta.ok) {
-      let resultado = await respuesta.json();
-      console.log("Elemento agregado:", resultado);
-    } else {
-      console.error("Error al agregar elemento:", respuesta.status, respuesta.statusText);
+    if (!respuesta.ok) {
+      throw new Error('Error en la solicitud ' + respuesta.statusText);
     }
+
+    let data = await respuesta.json();
+    console.log('Registro creado: ', data);
   } catch (error) {
-    console.error('Ocurrió un error al agregar el nuevo elemento:', error);
+    console.error('Algo salió mal al crear el registro: ', error);
   }
 }
 
-function tablaDinamica() {
+function tablaDinamica(listaDatos) {
+  let contenedorDivTabla = document.getElementById('contenedorDivTabla');
   let elementoTabla = document.createElement('table');
   elementoTabla.className = 'tablaDeDatos';
   elementoTabla.id = 'tablaDeDatos';
 
+  // Crear el encabezado de la tabla
   let crearEncabezadoElemento = document.createElement('tr');
   let encabezado = {
     encabezadoPuntoEntrada: 'Entrada(PE)',
@@ -138,112 +64,261 @@ function tablaDinamica() {
     encabezadoRiesgoBeneficio: 'RiesgoBeneficio(RB)',
     encabezadoLotage: 'Cantidad(Lotage)',
     encabezadoFecha: 'Fecha Actual',
+    entrada_es_compra: 'Compra o venta',
     encabezadoResultado: 'Resultado',
     encabezadoNumeroEntrada: 'Numero Entrada(id)',
-    encabezadoBtnAgregarFila: 'valor'
+    encabezadoBtnAgregarFila: ''
   };
 
   for (let titulo in encabezado) {
-    let celda = document.createElement('th');
-    
-    if (titulo == 'encabezadoBtnAgregarFila') {
-      let botonGuardar = document.createElement('button');
-      botonGuardar.id = 'btnAgregar';
-      botonGuardar.textContent = '+';
-      botonGuardar.className = 'btnGuardar';
-      botonGuardar.addEventListener('click', function () {
-        agregarInformacionTabla();
+    let encabezadoCelda = document.createElement('th');
+
+    if (titulo === "encabezadoBtnAgregarFila") {
+      let botonCrearFila = document.createElement('button');
+      botonCrearFila.id = 'btnAgregarFila';
+      botonCrearFila.className = 'btnAgregarFila';
+      botonCrearFila.textContent = '+';
+      encabezadoCelda.appendChild(botonCrearFila);
+
+      botonCrearFila.addEventListener('click', function () {
+        console.log('funciona');
+        crearFilaIngresarInformacion(elementoTabla);
       });
-      celda.appendChild(botonGuardar);
     } else {
-      celda.textContent = encabezado[titulo];
+      encabezadoCelda.textContent = encabezado[titulo];
     }
-
-    crearEncabezadoElemento.appendChild(celda);
+    crearEncabezadoElemento.appendChild(encabezadoCelda);
   }
-
   elementoTabla.appendChild(crearEncabezadoElemento);
 
-  let contenedorDivTabla = document.getElementById('contenedorDivTabla');
+  for (let datos of listaDatos) {
+    AgregarInformacionATablaDeBaseDeDatos(elementoTabla, datos);
+  }
+
   contenedorDivTabla.appendChild(elementoTabla);
+  return elementoTabla
+
 }
 
-function agregarInformacionTabla(información) {
-  let elementoTabla = document.getElementById('tablaDeDatos');
-  let fila = document.createElement('tr');
-  let celdas = {
-    celdaPuntoEntrada: "entrada",
-    celdaSalidaPerdida: "salida_perdida",
-    celdaSalidaGanacia: "salida_ganacia",
+function AgregarInformacionATablaDeBaseDeDatos(elementoTabla, datos) {
+  let fila = elementoTabla.insertRow();
+  let camposExcluidos = {
+    celdaPuntoEntrada: "punto_entrada",
+    celdaSalidaPerdida: "stop_loss",
+    celdaSalidaGanacia: "take_profit",
     celdaRiesgoBeneficio: "riesgo_beneficio",
     celdaLotage: "cantidad_lotaje",
-    celdaFecha: "fecha_actualizacion",
-    celdaResultado: "resultado",
+    celdaFecha: "fecha_creacion",
+    celdaEntrada_es_compra: 'entrada_es_compra',
+    celdaResultado: "entrada_ganada",
     celdaNumeroEntrada: "id_entrada",
     celdaBtn: ""
   };
 
-  if (información) {
-    for (let celda in celdas) {
-      let crearCelda = document.createElement('td');
-      if (celda === 'celdaBtn') {
-        let botonGuardar = document.createElement('button');
-        botonGuardar.id = 'btnGuardar';
-        botonGuardar.textContent = '';
-        botonGuardar.className = 'btnGuardar';
-        crearCelda.appendChild(botonGuardar);
-        
-        botonGuardar.addEventListener('click', function () {
-          // Obtén todos los inputs en la fila actual
-          let inputs = fila.getElementsByTagName('input');
-          
-          // Recorre los inputs y reemplaza con span
-          for (let i = 0; i < inputs.length; i++) {
-            let nuevoElemento = document.createElement("span");
-            nuevoElemento.textContent = inputs[i].value;
-            inputs[i].parentNode.replaceChild(nuevoElemento, inputs[i]);
-          }
-        });
-      } else {
-        let valorCelda = información[celdas[celda]];
-        if (valorCelda !== null && valorCelda !== undefined) {
-          // Si el valor no es nulo o indefinido, muestra el valor en lugar de un input
-          let nuevoElemento = document.createElement("span");
-          nuevoElemento.textContent = valorCelda;
-          crearCelda.appendChild(nuevoElemento);
+  let nombreId = 1;
+  for (let titulo in camposExcluidos) {
+    let celda = fila.insertCell();
+    celda.textContent = datos[camposExcluidos[titulo]];
+    celda.id = 'CeldaCorrespondiente' + nombreId;
+    nombreId++
 
-        } else {
-          // Si el valor es nulo o indefinido, crea un input vacío
-          let input = document.createElement('input');
-          input.type = 'text';
-          crearCelda.appendChild(input);
-        }
-      }
-      fila.appendChild(crearCelda);
+    if (titulo === 'celdaBtn') {
+      botonGuardar(celda);
     }
-  } else {
-    // Cuando no hay información, crea celdas vacías
-    for (let celda in celdas) {
-      let crearCelda = document.createElement('td');
-      if (celda === 'celdaBtn') {
-        let botonGuardar = document.createElement('button');
-        botonGuardar.id = 'btnGuardar';
-        botonGuardar.textContent = '';
-        botonGuardar.className = 'btnGuardar';
-        crearCelda.appendChild(botonGuardar);
-      } else {
-        let input = document.createElement('input');
-        input.type = 'text';
-        crearCelda.appendChild(input);
-      }
-      fila.appendChild(crearCelda);
+    
+  }
+}
+
+function crearFilaIngresarInformacion(elementoTabla) {
+  let fila = elementoTabla.insertRow();
+  fila.id = 'filaID';
+  let camposExcluidos = {
+    celdaPuntoEntrada: "",
+    celdaSalidaPerdida: "",
+    celdaSalidaGanacia: "",
+    celdaRiesgoBeneficio: "",
+    celdaLotage: "",
+    celdaFecha: "",
+    celdaEntrada_es_compra: '',
+    celdaResultado: "",
+    celdaNumeroEntrada: "",
+    celdaBtn: ""
+  };
+  let nombreId = 1;
+
+  for (let titulo in camposExcluidos) {
+    let celda = fila.insertCell();
+    celda.id = 'celdasID';
+
+    if (titulo == 'celdaNumeroEntrada') {
+      celda.textContent = '';
+    } else if (titulo == 'celdaFecha') {
+      celda.textContent = '';
+    } else if (titulo == 'celdaBtn') {
+      botonGuardar(celda);
+    }else if (titulo === 'celdaEntrada_es_compra') {
+    
+      let select = document.createElement('select');
+      select.id = 'select'; 
+     
+
+      let option1 = document.createElement('option');
+      option1.value = true;
+      option1.text = 'compra';
+      
+      let option2 = document.createElement('option');
+      option2.value = false;
+      option2.text = 'venta';
+    
+      select.appendChild(option1);
+      select.appendChild(option2);
+    
+
+      celda.appendChild(select);
+    }else if(titulo == 'celdaResultado'){
+      
+      let select = document.createElement('select');
+      select.id = 'select1'; // 
+    
+      
+      let option1 = document.createElement('option');
+      option1.value = true;
+      option1.text = 'Ganada';
+    
+      let option2 = document.createElement('option');
+      option2.value = false;
+      option2.text = 'Perdida';
+    
+      select.appendChild(option1);
+      select.appendChild(option2);
+    
+      celda.appendChild(select);
+    }
+     else {
+      let input = document.createElement('input');
+      celda.appendChild(input);
+      input.id = 'entradaInput' + nombreId;
+      nombreId++;
     }
   }
+}
+
+function botonGuardar(celda) {
+  btnGuardar = document.createElement('button');
+  btnGuardar.id = 'btnGuardar';
+  btnGuardar.className = 'btnGuardar';
+  celda.appendChild(btnGuardar);
   
-  // Agregar la fila a la tabla
-  elementoTabla.appendChild(fila);
+  btnGuardar.addEventListener('click', function () {    
+  let selectElement1 = document.getElementById('select');
+  let selectedValue1 = Boolean(selectElement1.value);
+  console.log(selectedValue1)
+
+  let selectElement2 = document.getElementById('select1');
+  let selectedValue2 = Boolean(selectElement2.value);
+  console.log(selectedValue2)
+  
+  let datos = {
+    punto_entrada: parseFloat(document.getElementById('entradaInput1').value),
+    stop_loss: parseFloat(document.getElementById('entradaInput2').value),
+    take_profit: parseFloat(document.getElementById('entradaInput3').value),
+    riesgo_beneficio: parseFloat(document.getElementById('entradaInput4').value),
+    cantidad_lotaje: parseFloat(document.getElementById('entradaInput5').value),
+    cantidad_inicial_usdt: 1000,
+    entrada_es_compra: selectedValue1,
+    entrada_ganada: selectedValue2, 
+    nota_personal: "nota de prueba",
+    plan_trading_detalle: "detalle de prueba",
+    trading_objetivo: "Objetivo de trading"
+  }
+    console.log(datos)
+    
+    insertarDatos(datos)
+  });
+
+}
+function modificarDatosEntradas(idEntrada, datosModificados) {
+  fetch(`http://localhost:5000/update/${idEntrada}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${btoa(`${auth.username}:${auth.password}`)}`
+    },
+    body: JSON.stringify(datosModificados)
+  })
+    .then(respuesta => respuesta.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error', error));
+}
+
+const datosModificados = {
+  "punto_entrada": 88888
+};
+
+function neyen(){
+  modificarDatosEntradas(valorCelda, datosModificados);
 }
 
 
-tablaDinamica()
-obtenerInformacion()
+let inputActivo = false; // Variable para rastrear si el input está activo
+let valorOriginal = null; // Variable para rastrear el valor original de la celda
+let celdaActiva = null; // Variable para rastrear la celda activa en edición
+
+function btnModificar(elemetoTablaInfo) {
+  elemetoTablaInfo.addEventListener('click', function(event) {
+    let filaClickeada = event.target.closest('tr');
+    let celdaClickeada = event.target.closest('td');
+    let celdaCorrespondiente = filaClickeada.querySelector('#CeldaCorrespondiente9');
+    let valorID = celdaCorrespondiente.textContent;
+    console.log(valorID +  'este')
+
+
+    if (filaClickeada && celdaClickeada) {
+        if (!inputActivo) { // Verifica si el input no está activo
+          inputActivo = true; // Marca el input como activo
+          celdaActiva = celdaClickeada; // Marca la celda actual como activa
+          valorOriginal = celdaClickeada.textContent; // Guarda el valor original
+          console.log('Valor original de la celda: ' + valorOriginal);
+
+          // Crea el input y establece su valor
+          let inputModificar = document.createElement('input');
+          inputModificar.value = valorOriginal;
+          celdaClickeada.innerHTML = ''; // Borra el contenido actual de la celda
+          celdaClickeada.appendChild(inputModificar);
+
+          // Agrega un manejador de eventos al input para detectar cambios o cancelaciones
+          inputModificar.addEventListener('dblclick', function() {
+            // Cuando el input pierde el enfoque (blur), se considera como finalización
+            guardarCambios();
+          });
+        }
+      
+    }
+  });
+
+  function guardarCambios() {
+    if (celdaActiva) {
+      let inputModificar = celdaActiva.querySelector('input');
+      if (inputModificar) {
+        let valorCelda = inputModificar.value;
+        celdaActiva.removeChild(inputModificar);
+        celdaActiva.textContent = valorCelda;
+        inputActivo = false; // Marca el input como no activo
+        valorOriginal = null;
+        celdaActiva = null;
+      }
+    }
+  }
+}
+
+
+function Perro(nombre, edad){
+  this.nombre = nombre;
+  this.edad = edad;
+}
+
+let miPerro = Perro('agustin', 21)
+
+
+
+obtenerInformacion();
