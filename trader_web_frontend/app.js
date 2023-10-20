@@ -18,7 +18,7 @@ async function obtenerInformacion() {
 
     let listaDatos = await response.json();
     let tablaDeDatos = tablaDinamica(listaDatos);
-    btnModificar(tablaDeDatos)
+    btnModificar(tablaDeDatos, listaDatos)
 
     
   } catch (error) {
@@ -102,7 +102,8 @@ function tablaDinamica(listaDatos) {
 
 function AgregarInformacionATablaDeBaseDeDatos(elementoTabla, datos) {
   let fila = elementoTabla.insertRow();
-  let camposExcluidos = {
+  fila.id = 'nuevaFila';
+  let camposRequeridos = {
     celdaPuntoEntrada: "punto_entrada",
     celdaSalidaPerdida: "stop_loss",
     celdaSalidaGanacia: "take_profit",
@@ -116,9 +117,9 @@ function AgregarInformacionATablaDeBaseDeDatos(elementoTabla, datos) {
   };
 
   let nombreId = 1;
-  for (let titulo in camposExcluidos) {
+  for (let titulo in camposRequeridos) {
     let celda = fila.insertCell();
-    celda.textContent = datos[camposExcluidos[titulo]];
+    celda.textContent = datos[camposRequeridos[titulo]];
     celda.id = 'CeldaCorrespondiente' + nombreId;
     nombreId++
 
@@ -132,7 +133,7 @@ function AgregarInformacionATablaDeBaseDeDatos(elementoTabla, datos) {
 function crearFilaIngresarInformacion(elementoTabla) {
   let fila = elementoTabla.insertRow();
   fila.id = 'filaID';
-  let camposExcluidos = {
+  let camposRequeridos = {
     celdaPuntoEntrada: "",
     celdaSalidaPerdida: "",
     celdaSalidaGanacia: "",
@@ -146,7 +147,7 @@ function crearFilaIngresarInformacion(elementoTabla) {
   };
   let nombreId = 1;
 
-  for (let titulo in camposExcluidos) {
+  for (let titulo in camposRequeridos) {
     let celda = fila.insertCell();
     celda.id = 'celdasID';
 
@@ -203,6 +204,7 @@ function crearFilaIngresarInformacion(elementoTabla) {
   }
 }
 
+
 function botonGuardar(celda) {
   btnGuardar = document.createElement('button');
   btnGuardar.id = 'btnGuardar';
@@ -251,74 +253,113 @@ function modificarDatosEntradas(idEntrada, datosModificados) {
     .catch(error => console.error('Error', error));
 }
 
-const datosModificados = {
-  "punto_entrada": 88888
+let datosModificados = {
+  "punto_entrada": 77777
 };
 
 function neyen(){
-  modificarDatosEntradas(valorCelda, datosModificados);
+  modificarDatosEntradas(1,datosModificados);
 }
 
 
-let inputActivo = false; // Variable para rastrear si el input está activo
-let valorOriginal = null; // Variable para rastrear el valor original de la celda
-let celdaActiva = null; // Variable para rastrear la celda activa en edición
+function btnModificar(elementoTablaInfo, listaDatos) {
+  let celdasBtn = document.querySelectorAll('#CeldaCorrespondiente10');
 
-function btnModificar(elemetoTablaInfo) {
-  elemetoTablaInfo.addEventListener('click', function(event) {
+  for (let celda of celdasBtn) {
+    let btnGuardar = document.getElementById('btnGuardar');
+    if (btnGuardar) {
+      celda.removeChild(btnGuardar);
+    }
+
+    let btnModificar = document.createElement('button');
+    btnModificar.id = 'btnModificar';
+    btnModificar.classList.add('btn-modificar');
+    celda.appendChild(btnModificar);
+  }
+
+  elementoTablaInfo.addEventListener('click', function (event) {
     let filaClickeada = event.target.closest('tr');
     let celdaClickeada = event.target.closest('td');
-    let celdaCorrespondiente = filaClickeada.querySelector('#CeldaCorrespondiente9');
-    let valorID = celdaCorrespondiente.textContent;
-    console.log(valorID +  'este')
+    let valorCeldaClick = celdaClickeada.textContent;
+
+    // Verifica si el elemento clickeado es un input para evitar reemplazarlo
+    if (event.target.tagName !== 'INPUT') {
+      let inputCelda = document.createElement('input');
+      inputCelda.value = valorCeldaClick;
+      celdaClickeada.innerHTML = '';
+      celdaClickeada.appendChild(inputCelda);
+      inputCelda.addEventListener('click', function (e) {
+        e.stopPropagation();
+      });
+      inputCelda.focus();
+
+      // Agrega un evento blur para guardar los cambios cuando se pierde el enfoque del input
+      inputCelda.addEventListener('blur', function () {
+        let celdaCorrespondiente = filaClickeada.querySelector('#CeldaCorrespondiente9');
+        console.log(celdaCorrespondiente.textContent)
+        celdaClickeada.textContent = inputCelda.value;
+        console.log(celdaClickeada.id,':', inputCelda.value, 'este es el valor actua;')
+        let nuevoValor = inputCelda.value
 
 
-    if (filaClickeada && celdaClickeada) {
-        if (!inputActivo) { // Verifica si el input no está activo
-          inputActivo = true; // Marca el input como activo
-          celdaActiva = celdaClickeada; // Marca la celda actual como activa
-          valorOriginal = celdaClickeada.textContent; // Guarda el valor original
-          console.log('Valor original de la celda: ' + valorOriginal);
+        let encabezadoCorrespondiente = document.querySelector('td');
+        let encabezadoo = encabezadoCorrespondiente;
+        console.log(encabezadoo.id, 'este es el encabezado correeeeeeee')
 
-          // Crea el input y establece su valor
-          let inputModificar = document.createElement('input');
-          inputModificar.value = valorOriginal;
-          celdaClickeada.innerHTML = ''; // Borra el contenido actual de la celda
-          celdaClickeada.appendChild(inputModificar);
 
-          // Agrega un manejador de eventos al input para detectar cambios o cancelaciones
-          inputModificar.addEventListener('dblclick', function() {
-            // Cuando el input pierde el enfoque (blur), se considera como finalización
-            guardarCambios();
-          });
+
+        let camposRequeridos = {
+          CeldaCorrespondiente1 : "punto_entrada",
+          CeldaCorrespondiente2 : "stop_loss",
+          CeldaCorrespondiente3 : "take_profit",
+          CeldaCorrespondiente4: "riesgo_beneficio",
+          CeldaCorrespondiente5: "cantidad_lotaje",
+          CeldaCorrespondiente6: "fecha_creacion",
+          CeldaCorrespondiente7: 'entrada_es_compra',
+          CeldaCorrespondiente8: "entrada_ganada",
+          CeldaCorrespondiente9: "id_entrada",
+          CeldaCorrespondiente10: ""
+        };
+
+        for(let clave in camposRequeridos){
+          if(clave == encabezadoo.id){
+            console.log(camposRequeridos[clave])
+            
+            let datosModificados = {[camposRequeridos[clave]] : nuevoValor}
+            
+            console.log(datosModificados)
+            
+
+
+            modificarDatosEntradas(celdaCorrespondiente.textContent, datosModificados);
+
+           
+
+
+
+          }
         }
       
+    
+
+        
+
+
+
+        // 
+      
+        
+        // console.log (datosModificados, 'datos mmodificados')
+
+      
+       
+
+      });
     }
   });
-
-  function guardarCambios() {
-    if (celdaActiva) {
-      let inputModificar = celdaActiva.querySelector('input');
-      if (inputModificar) {
-        let valorCelda = inputModificar.value;
-        celdaActiva.removeChild(inputModificar);
-        celdaActiva.textContent = valorCelda;
-        inputActivo = false; // Marca el input como no activo
-        valorOriginal = null;
-        celdaActiva = null;
-      }
-    }
-  }
 }
-
-
-function Perro(nombre, edad){
-  this.nombre = nombre;
-  this.edad = edad;
-}
-
-let miPerro = Perro('agustin', 21)
 
 
 
 obtenerInformacion();
+

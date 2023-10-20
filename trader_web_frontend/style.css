@@ -147,17 +147,37 @@ body {
     background-color: #3498db; /* Fondo azul */
     color: #fff; /* Texto blanco */
   }
-  
-  /* Estilos para filas pares */
-  tr:nth-child(even) {
-    background-color: rgba(236, 240, 241, 0.5)
-    ; /* Fondo gris claro */
-  }
-  
+
+  .filaClickeada {
+    background-color: rgba(236, 240, 241, 0.5);
+  } 
+
   /* Estilos para encabezados al pasar el cursor */
   th:hover {
     background-color: #2980b9; /* Fondo azul más oscuro al pasar el cursor */
 }
+
+/* estilos aun no aplicados */
+.btn-modificar::before {
+  content: "\270E"; 
+  color: blue; 
+  font-size: 24px;  
+   
+}   
+
+/* .filaClickeada{
+background-color: rgb(68, 68, 59);
+} */
+
+/* #CeldaCorrespondiente1{
+border: solid black;
+} */
+
+
+
+/*  */
+
+
 
 .btnGuardar, .btnAgregarFila {
     background-color: #007bff; 
@@ -187,9 +207,3 @@ body {
     background-color: #ecf0f1 ;
 }
 
-.celda-modificar::before {
-    content: "\270E"; 
-    color: blue; 
-    font-size: 24px;   
-}   
-  
