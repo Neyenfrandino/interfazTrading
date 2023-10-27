@@ -54,7 +54,6 @@ function tablaDinamica(listaDatos) {
   elementoTabla.className = 'tablaDeDatos';
   elementoTabla.id = 'tablaDeDatos';
 
-  // Crear el encabezado de la tabla
   let crearEncabezadoElemento = document.createElement('tr');
   let encabezado = {
     encabezadoPuntoEntrada: 'Entrada(PE)',
@@ -355,7 +354,7 @@ function obtenerNuevosDatosUsuario() {
           celdaClickeada.dataset.valorOriginal = celdaClickeada.textContent;
           celdaClickeada.contentEditable = true;
           celdaClickeada.addEventListener('blur', function() {
-            let nuevoContenido = celdaClickeada.textContent;
+          let nuevoContenido = celdaClickeada.textContent;
 
             guardarDatosEnArray.push([celdaClickeada.id, nuevoContenido]);
             IdFilaCorrespondiente = filaClickeada
@@ -375,5 +374,28 @@ function obtenerNuevosDatosUsuario() {
   }
   
 }
+
+function agregarPlanDeTrading(){
+  let UlLista = document.getElementById('listaPlanTrading');
+  let btnAgregarPlanDeTrading = document.getElementById('btnPlanTrading');
+
+  btnAgregarPlanDeTrading.addEventListener('click', function(){
+    let itemLista = document.createElement('li')
+    itemLista.contentEditable = true
+    UlLista.appendChild(itemLista);
+
+
+    btnAgregarPlanDeTrading.addEventListener('click', function(){
+      let nuevoContenido = itemLista.textContent
+      console.log(nuevoContenido)
+
+
+    })
+
+  })
+
+}
+
+
 
 obtenerInformacion();
