@@ -142,7 +142,7 @@ def update_entry(id):
 
 # Ruta para eliminar una entrada de trading por ID
 @app.route('/delete/<int:id>', methods=['DELETE'])
-@basic_auth.required
+# @basic_auth.required
 def delete_entry(id):
     entry = TradingEntry.query.get(id)
     

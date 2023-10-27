@@ -18,14 +18,13 @@ async function obtenerInformacion() {
 
     let listaDatos = await response.json();
     let tablaDeDatos = tablaDinamica(listaDatos);
-    btnModificar(tablaDeDatos, listaDatos)
+    obtenerNuevosDatosUsuario(tablaDeDatos, listaDatos)
 
     
   } catch (error) {
     console.error('Ocurrió un error al obtener la información:', error);
   }
 }
-
 
 async function insertarDatos(datos) {
   try {
@@ -97,7 +96,6 @@ function tablaDinamica(listaDatos) {
 
   contenedorDivTabla.appendChild(elementoTabla);
   return elementoTabla
-
 }
 
 function AgregarInformacionATablaDeBaseDeDatos(elementoTabla, datos) {
@@ -156,7 +154,7 @@ function crearFilaIngresarInformacion(elementoTabla) {
     } else if (titulo == 'celdaFecha') {
       celda.textContent = '';
     } else if (titulo == 'celdaBtn') {
-      botonGuardar(celda);
+      botonGuardarInfonuevaFila(celda);
     }else if (titulo === 'celdaEntrada_es_compra') {
     
       let select = document.createElement('select');
@@ -204,8 +202,7 @@ function crearFilaIngresarInformacion(elementoTabla) {
   }
 }
 
-
-function botonGuardar(celda) {
+function botonGuardarInfonuevaFila(celda) {
   btnGuardar = document.createElement('button');
   btnGuardar.id = 'btnGuardar';
   btnGuardar.className = 'btnGuardar';
@@ -232,13 +229,12 @@ function botonGuardar(celda) {
     nota_personal: "nota de prueba",
     plan_trading_detalle: "detalle de prueba",
     trading_objetivo: "Objetivo de trading"
-  }
-    console.log(datos)
-    
+  }    
     insertarDatos(datos)
   });
 
 }
+
 function modificarDatosEntradas(idEntrada, datosModificados) {
   fetch(`http://localhost:5000/update/${idEntrada}`, {
     method: 'PUT',
@@ -253,113 +249,131 @@ function modificarDatosEntradas(idEntrada, datosModificados) {
     .catch(error => console.error('Error', error));
 }
 
-let datosModificados = {
-  "punto_entrada": 77777
-};
+function guardarCambios(IdFilaCorrespondiente, data){
+  console.log(data, 'datos')
 
-function neyen(){
-  modificarDatosEntradas(1,datosModificados);
+  let celdaCorrespondiente = IdFilaCorrespondiente.querySelector('#CeldaCorrespondiente9');
+  console.log(celdaCorrespondiente, 'aquie EventSource;pkngre')
+  let datosModificados = {}
+
+  let camposRequeridos = {
+    CeldaCorrespondiente1 : "punto_entrada",
+    CeldaCorrespondiente2 : "stop_loss",
+    CeldaCorrespondiente3 : "take_profit",
+    CeldaCorrespondiente4: "riesgo_beneficio",
+    CeldaCorrespondiente5: "cantidad_lotaje",
+    CeldaCorrespondiente6: "fecha_creacion",
+    CeldaCorrespondiente7: 'entrada_es_compra',
+    CeldaCorrespondiente8: "entrada_ganada",
+    CeldaCorrespondiente9: "id_entrada",
+    CeldaCorrespondiente10: ""
+  };
+  for (let campo of data) {
+    for (let camposDataBase in camposRequeridos) {
+      if (campo[0] == camposDataBase && !datosModificados[camposRequeridos[camposDataBase]]) {
+        let nuevoValor = campo[1];
+        console.log(nuevoValor);
+  
+        datosModificados[camposRequeridos[camposDataBase]] = nuevoValor;
+      }
+    }
+  }
+  
+ modificarDatosEntradas(celdaCorrespondiente.textContent, datosModificados);
+}
+
+function eliminarEntrada(nroEntrada, celda){
+  let btnEliminar = document.createElement('button')
+  btnEliminar.className = 'btnEliminar'
+
+  btnEliminar.addEventListener('click', function(){
+    
+    let respuestaUsuario = prompt('Si desea eliminar la entrada escriba "Si", de lo contrario escriba "No : ')
+
+    if(respuestaUsuario == 'Si'){
+      fetch('http://localhost:5000/delete/'+ nroEntrada,{
+        method: "delete"
+      })
+      .then(respuesta => respuesta.json())
+      .then(data => console.log(data))
+      .catch(error => console.error('Error:', error))
+    }
+  })
+  celda.appendChild(btnEliminar); 
 }
 
 
-function btnModificar(elementoTablaInfo, listaDatos) {
-  let celdasBtn = document.querySelectorAll('#CeldaCorrespondiente10');
-
-  for (let celda of celdasBtn) {
-    let btnGuardar = document.getElementById('btnGuardar');
-    if (btnGuardar) {
-      celda.removeChild(btnGuardar);
-    }
-
-    let btnModificar = document.createElement('button');
-    btnModificar.id = 'btnModificar';
-    btnModificar.classList.add('btn-modificar');
-    celda.appendChild(btnModificar);
-  }
-
-  elementoTablaInfo.addEventListener('click', function (event) {
-    let filaClickeada = event.target.closest('tr');
-    let celdaClickeada = event.target.closest('td');
-    let valorCeldaClick = celdaClickeada.textContent;
-
-    // Verifica si el elemento clickeado es un input para evitar reemplazarlo
-    if (event.target.tagName !== 'INPUT') {
-      let inputCelda = document.createElement('input');
-      inputCelda.value = valorCeldaClick;
-      celdaClickeada.innerHTML = '';
-      celdaClickeada.appendChild(inputCelda);
-      inputCelda.addEventListener('click', function (e) {
-        e.stopPropagation();
-      });
-      inputCelda.focus();
-
-      // Agrega un evento blur para guardar los cambios cuando se pierde el enfoque del input
-      inputCelda.addEventListener('blur', function () {
-        let celdaCorrespondiente = filaClickeada.querySelector('#CeldaCorrespondiente9');
-        console.log(celdaCorrespondiente.textContent)
-        celdaClickeada.textContent = inputCelda.value;
-        console.log(celdaClickeada.id,':', inputCelda.value, 'este es el valor actua;')
-        let nuevoValor = inputCelda.value
-
-
-        let encabezadoCorrespondiente = document.querySelector('td');
-        let encabezadoo = encabezadoCorrespondiente;
-        console.log(encabezadoo.id, 'este es el encabezado correeeeeeee')
-
-
-
-        let camposRequeridos = {
-          CeldaCorrespondiente1 : "punto_entrada",
-          CeldaCorrespondiente2 : "stop_loss",
-          CeldaCorrespondiente3 : "take_profit",
-          CeldaCorrespondiente4: "riesgo_beneficio",
-          CeldaCorrespondiente5: "cantidad_lotaje",
-          CeldaCorrespondiente6: "fecha_creacion",
-          CeldaCorrespondiente7: 'entrada_es_compra',
-          CeldaCorrespondiente8: "entrada_ganada",
-          CeldaCorrespondiente9: "id_entrada",
-          CeldaCorrespondiente10: ""
-        };
-
-        for(let clave in camposRequeridos){
-          if(clave == encabezadoo.id){
-            console.log(camposRequeridos[clave])
-            
-            let datosModificados = {[camposRequeridos[clave]] : nuevoValor}
-            
-            console.log(datosModificados)
-            
-
-
-            modificarDatosEntradas(celdaCorrespondiente.textContent, datosModificados);
-
-           
-
-
-
-          }
-        }
-      
+function botonGuardar(i){
+  let celdasBtn = i.querySelectorAll('#CeldaCorrespondiente10');
+    for (let celda of celdasBtn) {
+      let btnGuardar = document.getElementById('btnGuardar');
+      if (btnGuardar) {
+        celda.removeChild(btnGuardar);
+      }
+      let guardarcambiosYmodificar = document.createElement('button');
+      guardarcambiosYmodificar.id = 'guardarcambiosYmodificar'
+      guardarcambiosYmodificar.classList.add('btn-modificar');
+      celda.appendChild(guardarcambiosYmodificar);
     
 
-        
+     
 
-
-
-        // 
-      
-        
-        // console.log (datosModificados, 'datos mmodificados')
-
-      
-       
-
-      });
+      let celdasID = i.querySelectorAll('#CeldaCorrespondiente9');
+      for(let idCelda of celdasID){
+        eliminarEntrada(idCelda.textContent,celda)
+      }
     }
-  });
 }
 
+function obtenerNuevosDatosUsuario() {
+  let nuevaFila = document.querySelectorAll('#nuevaFila');
+  let nombreAgregadoId = 0;
+  let guardarDatosEnArray = [];
+  let celdasClickeadas = []; 
+  let IdFilaCorrespondiente;
 
+  for (let i of nuevaFila) {
+    i.id = 'nuevaFila' + nombreAgregadoId;
+    nombreAgregadoId++;
+    botonGuardar(i);
+   
+
+    i.addEventListener('click', function(event) {
+      let celdaClickeada = event.target.closest('td');
+      let filaClickeada = event.target.closest('tr');
+      let celdaCorrespondienteID = filaClickeada.querySelector('#CeldaCorrespondiente9');
+
+      if (!celdasClickeadas.includes(celdaClickeada)) {
+        celdasClickeadas.push(celdaClickeada);
+        if (celdaClickeada.id != 'CeldaCorrespondiente10' 
+                          && celdaClickeada.id != 'CeldaCorrespondiente9' 
+                          && celdaClickeada.id != 'CeldaCorrespondiente8'
+                          && celdaClickeada.id != 'CeldaCorrespondiente7' 
+                          && celdaClickeada.id != 'CeldaCorrespondiente6'){
+          filaClickeada.classList.add('filaSeleccionada')
+
+          celdaClickeada.dataset.valorOriginal = celdaClickeada.textContent;
+          celdaClickeada.contentEditable = true;
+          celdaClickeada.addEventListener('blur', function() {
+            let nuevoContenido = celdaClickeada.textContent;
+
+            guardarDatosEnArray.push([celdaClickeada.id, nuevoContenido]);
+            IdFilaCorrespondiente = filaClickeada
+            
+            celdaClickeada.contentEditable = false;
+          });
+        }
+      }
+    });
+  }
+  let guardarcambiosYmodificar = document.querySelectorAll('#guardarcambiosYmodificar');
+  for(let btnCorrespondiente of guardarcambiosYmodificar){
+    btnCorrespondiente.addEventListener('click', function() {
+      console.log(IdFilaCorrespondiente, 'aqui fila click')
+      guardarCambios(IdFilaCorrespondiente, guardarDatosEnArray);
+    });
+  }
+  
+}
 
 obtenerInformacion();
-

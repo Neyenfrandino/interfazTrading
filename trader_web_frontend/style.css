@@ -161,13 +161,18 @@ body {
 .btn-modificar::before {
   content: "\270E"; 
   color: blue; 
-  font-size: 24px;  
-   
+  font-size: 14px; 
 }   
 
-/* .filaClickeada{
-background-color: rgb(68, 68, 59);
-} */
+.btn-modificar:hover{
+  background-color: #d3dae5;
+  transform: translateY(-2px); 
+  cursor: pointer;
+}
+
+.filaSeleccionada{
+  background-color: rgba(68, 68, 59, 0.5);
+}
 
 /* #CeldaCorrespondiente1{
 border: solid black;
@@ -179,7 +184,7 @@ border: solid black;
 
 
 
-.btnGuardar, .btnAgregarFila {
+.btnGuardar, .btnAgregarFila{
     background-color: #007bff; 
     color: white; 
     border: none; 
@@ -189,6 +194,32 @@ border: solid black;
     font-size: 14px; 
     display: flex;
     right: 100px;
+    margin: 5px;
+}
+
+.btnEliminar{
+  background-color: #f84242; 
+  color: white; 
+  border: none; 
+  padding: 5px 10px; 
+  border-radius: 5px;
+  cursor: pointer; 
+  font-size: 14px; 
+  display: flex;
+  right: 100px;
+  margin: 5px;
+}
+
+.btnEliminar:hover{
+  background-color: #7a1b1b;
+  transform: translateY(-2px); 
+}
+
+/* Estilo del icono */
+.btnEliminar::before {
+  content: "\2716"; /* Carácter Unicode para la "X" (icono de eliminación) */
+  margin-right: 0px; /* Espacio entre el icono y el texto */
+  font-size: 14px; 
 }
 
 .btnGuardar::after {
@@ -207,3 +238,7 @@ border: solid black;
     background-color: #ecf0f1 ;
 }
 
+
+.inputCelda{
+  display: none;
+}
