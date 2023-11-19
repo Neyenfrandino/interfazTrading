@@ -176,7 +176,7 @@ body {
 }
 
 
-.btnGuardar, .btnAgregarFila{
+.btnGuardar, .btn_agregas_nueva_entrada{
     background-color: #007bff; 
     color: white; 
     border: none; 
@@ -219,7 +219,7 @@ body {
     margin-left: 0px; 
 }
 
-.btnGuardar:hover,.btnAgregarFila:hover {
+.btnGuardar:hover,.btn_agregas_nueva_entrada:hover {
     background-color: #0056b3;
     transform: translateY(-2px); 
 }
@@ -228,6 +228,24 @@ body {
     width: 100%;
     border: none;
     background-color: #ecf0f1 ;
+}
+
+.btn_resultado, .btn_compra_o_venta {
+  background-color: #4CAF50; /* Color de fondo verde */
+  color: white; /* Texto blanco */
+  padding: 10px 15px; /* Espaciado interno */
+  border: none; /* Sin borde */
+  border-radius: 5px; /* Bordes redondeados */
+  cursor: pointer; /* Cursor de apuntador al pasar el mouse */
+}
+
+.btn_resultado:hover, .btn_compra_o_venta:hover {
+  background-color: #45a049; /* Cambio de color al pasar el mouse */
+}
+
+.error_ingresar_dato{
+  border:solid red;
+  background-color: rgba(255, 0, 0, 0.5);
 }
 
 
