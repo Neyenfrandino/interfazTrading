@@ -121,7 +121,7 @@ body {
     transform: translateY(-2px); 
 }
 
-/* 
+
 .tablaDeDatos {
     width: 80%;
     margin: 2% auto;
@@ -148,7 +148,7 @@ body {
 
   th:hover {
     background-color: #2980b9;
-} */
+}
 
 
 
@@ -252,7 +252,7 @@ body {
 
 
 
-
+/* 
 .tablaDeDatos {
   width: 85%;
   margin: 20px auto;
@@ -278,7 +278,7 @@ tr:nth-child(even) {
   background-color: #9c5c03; 
 }
 
-
+ */
 
 
 

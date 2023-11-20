@@ -454,23 +454,19 @@ async function insertarDatos(datos) {
 }
 
 function eliminarEntrada(nroEntrada){
-  // let btnEliminar = document.createElement('button')
-  // btnEliminar.className = 'btnEliminar'
 
-  // btnEliminar.addEventListener('click', function(){
-    
-    let respuestaUsuario = prompt('Si desea eliminar la entrada escriba "Si", de lo contrario escriba "No : ')
+  let respuestaUsuario = prompt('Si desea eliminar la entrada escriba "Si", de lo contrario escriba "No : ')
 
-    if(respuestaUsuario == 'Si'){
-      fetch('http://localhost:5000/delete/'+ nroEntrada,{
-        method: "delete"
-      })
-      .then(respuesta => respuesta.json())
-      .then(data => console.log(data))
-      .catch(error => console.error('Error:', error))
-    }
-  // })
+  if(respuestaUsuario == 'Si'){
+    fetch('http://localhost:5000/delete/'+ nroEntrada,{
+      method: "delete"
+    })
+    .then(respuesta => respuesta.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error))
+  }
 }
+
 
 function modificarDatosEntradas(idEntrada, datosModificados) {
   fetch(`http://localhost:5000/update/${idEntrada}`, {
@@ -782,6 +778,7 @@ class Tabla {
 
     
   }
+  
   botonModificarElementosEnbaseDeDatos() {
 
     let camposRequeridos = {
@@ -802,17 +799,16 @@ class Tabla {
   
     modificar_elemento_base_de_datos.addEventListener('click', function (event) {
       let filaClickeada = event.target.closest('tr');
+      filaClickeada.className = 'filaClickeada'
       let elementos_modificados_valor = filaClickeada.querySelectorAll('td');
       // console.log(elementos_modificados_valor)
   
       if (!botonModificado) {
-        // Modificar el botón y habilitar la edición de celdas
         modificar_elemento_base_de_datos.classList.remove('btn-modificar');
         modificar_elemento_base_de_datos.classList.add('btnGuardar');
   
         elementos_modificados_valor.forEach(function (celda) {
           celda.contentEditable = true;
-  
           // Agregar escuchador de eventos de entrada para identificar la celda modificada
           celda.addEventListener('input', function () {
             celda.classList.add('celda-modificada');
@@ -823,48 +819,52 @@ class Tabla {
       } else {
         // Guardar los cambios realizados en las celdas
         elementos_modificados_valor = Array.from(elementos_modificados_valor);
+        let datosValidos = false
 
         elementos_modificados_valor.forEach(function (element, i) {
           if (element.classList.contains('celda-modificada')) {
             let elementosConId = filaClickeada.querySelector('#celdaCorrespondiente8').textContent;
-            let contenido_modificado_y_adaptado = {}
-            if (!isNaN(parseFloat(element.textContent))) {
+            console.log(element.textContent)
+
+            if (!isNaN(parseFloat(element.textContent)) && !/[a-zA-Z]/.test(element.textContent)) {
+              datosValidos = true
+              let contenido_modificado_y_adaptado = {}
+
               let nuevoContenido = element.textContent;
               let campoCorrespondiente = camposRequeridos[i]
               contenido_modificado_y_adaptado[campoCorrespondiente] = nuevoContenido
-               
-              // console.log(`"${campoCorrespondiente}":"${nuevoContenido}"`)
               console.log(contenido_modificado_y_adaptado)
-          
-              // console.log(elementosConId, nuevoContenido)
+
               // Aquí puedes realizar la lógica para guardar los cambios en la base de datos
               modificarDatosEntradas(elementosConId, contenido_modificado_y_adaptado)
-            } else {
+            }else {
               element.classList.add('error_ingresar_dato');
               setTimeout(() => {
                 element.classList.remove('error_ingresar_dato');
               }, 2000);
+              
             }
           }
         });
-        
-        // Restaurar el botón y deshabilitar la edición de celdas
-        modificar_elemento_base_de_datos.classList.remove('btnGuardar');
-        modificar_elemento_base_de_datos.classList.add('btn-modificar');
-  
-        elementos_modificados_valor.forEach(function (celda) {
-          celda.contentEditable = false;
-          celda.classList.remove('celda-modificada');
-        });
-  
-        botonModificado = false;
+        if(datosValidos ==  true){
+          // Restaurar el botón y deshabilitar la edición de celdas
+            modificar_elemento_base_de_datos.classList.remove('btnGuardar');
+            modificar_elemento_base_de_datos.classList.add('btn-modificar');
+    
+            elementos_modificados_valor.forEach(function (celda) {
+            celda.contentEditable = false;
+            celda.classList.remove('celda-modificada');
+          });
+          botonModificado = false;
+
+        }
+
       }
     });
   
     return modificar_elemento_base_de_datos;
   }
-  
- 
+
 }
 
 function botonInsertarDatos(datosUsuario) {
@@ -911,9 +911,48 @@ function botonInsertarDatos(datosUsuario) {
   insertarDatos(datosRequeridosInsetTabla);
 }
 
+class datos_fuera_tabla{
+  constructor(datos_usuario){
+    this.datos_usuario = datos_usuario
+    this.elementos_necesarios = {
+      elementos_li: document.createElement('li'),
+      boton_guadar : document.createElement('button'),
+      boton_eliminar : document.createElement('button'),
+      boton_modificar : document.createElement('button'),
+    }
+  }
+
+  objetivo_trading(){
+    let btnObjetivos = document.getElementById('btnObjetivos')
+    let listaObjetivosUl = document.getElementById('listaObjetivos')
+    let datos_usuario = {}
+    let datos_en_cadena = []
+
+
+    btnObjetivos.addEventListener('click', () =>{
+      let li = this.elementos_necesarios.elementos_li.cloneNode(true);
+      li.contentEditable = true
+
+      li.addEventListener('blur', () =>{
+        let valor = li.textContent.trim();
+
+        datos_en_cadena.push(valor)
+        // datos_usuario['trading_objetivo'] = valor
+        console.log(valor);
+      })
+      console.log(JSON.stringify(datos_en_cadena))
+      console.log(datos_usuario)
+
+      listaObjetivosUl.appendChild(li)
+    })
+  }
+}
 
 let tabla = new Tabla(promesa);
 tabla.tituloEncabezados();
 tabla.agregandoInformacionTablaDesdeBaseDeDatos()
 tabla.btnEliminar()
 tabla.botonModificarElementosEnbaseDeDatos()
+
+let datos_fuera = new datos_fuera_tabla();
+datos_fuera.objetivo_trading()
