@@ -72,7 +72,20 @@ curl -u neyen:jet_blanca -X PUT -H "Content-Type: application/json" -d "{ \"plan
 
 Ejemplo de petición al método http `DELETE`:
 ```sh
-curl -u neyen:jet_blanca -X DELETE http://localhost:5000/delete/3
+curl -u neyen:jet_blanca -X DELETE http://localhost:5000/delete/63
+curl -u neyen:jet_blanca -X DELETE http://localhost:5000/delete/60
+curl -u neyen:jet_blanca -X DELETE http://localhost:5000/delete/61
+curl -u neyen:jet_blanca -X DELETE http://localhost:5000/delete/60
+curl -u neyen:jet_blanca -X DELETE http://localhost:5000/delete/50
+curl -u neyen:jet_blanca -X DELETE http://localhost:5000/delete/40
+curl -u neyen:jet_blanca -X DELETE http://localhost:5000/delete/30
+curl -u neyen:jet_blanca -X DELETE http://localhost:5000/delete/29
+curl -u neyen:jet_blanca -X DELETE http://localhost:5000/delete/28
+curl -u neyen:jet_blanca -X DELETE http://localhost:5000/delete/27
+curl -u neyen:jet_blanca -X DELETE http://localhost:5000/delete/26
+curl -u neyen:jet_blanca -X DELETE http://localhost:5000/delete/25
+curl -u neyen:jet_blanca -X DELETE http://localhost:5000/delete/24
+curl -u neyen:jet_blanca -X DELETE http://localhost:5000/delete/23
 
 
 ## Requerimiento para chatcito
